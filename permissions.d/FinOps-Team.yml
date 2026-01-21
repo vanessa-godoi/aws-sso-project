@@ -1,0 +1,17 @@
+name : "FinOps-Team"
+description: "Permission set for FinOps Team" 
+session_duration: "PT1H"
+policies:
+  managed_policies:
+
+  inline_policies: | 
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+          }
+      ]
+    }
