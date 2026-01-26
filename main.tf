@@ -22,7 +22,7 @@
 data "aws_ssoadmin_instances" "sso" {}
 
 resource "aws_ssoadmin_permission_set" "permission_set_cloud" {
-  name         = "Permission Set Cloud"
+  name         = "Permission-Set-Cloud"
   instance_arn = tolist(data.aws_ssoadmin_instances.sso.arns)[0]
 }
 
