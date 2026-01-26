@@ -2,32 +2,7 @@ data "aws_ssoadmin_instances" "sso" {}
 
 # output "sso_infos" {
 #   value = data.aws_ssoadmin_instances.sso.arns[0]
-# }
-
-resource "aws_ssoadmin_permission_set" "permission_set" {
-  for_each = {
-    for f in local.permissions : f.name => f
-  }
-  name             = each.value.name
-  description      = each.value.description
-  instance_arn     = local.instance_sso
-  session_duration = each.value.session_duration
-}
-
-# output "instance_arns" {
-#   value = local.instance_sso
-# }
-resource "aws_ssoadmin_permission_set_inline_policy" "attach-inline-policy" {
-  for_each = {
-    for p in local.permissions : p.policies.inline_policies => p...
-  }
-
-  inline_policy      = each.value[0].policies.inline_policies
-  instance_arn       = local.instance_sso
-  permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value[0].name].arn
-}
-
-
+# 
 # data "aws_ssoadmin_instances" "single-sign-on" {}
 
 # resource "aws_ssoadmin_permission_set" "permission_set_cloud" {
@@ -55,3 +30,32 @@ resource "aws_ssoadmin_permission_set_inline_policy" "attach-inline-policy" {
 #   instance_arn       = tolist(data.aws_ssoadmin_instances.single-sign-on.arns)[0]
 #   permission_set_arn = aws_ssoadmin_permission_set.permission_set_cloud.arn
 # }
+
+resource "aws_ssoadmin_permission_set" "permission_set" {
+  for_each = {
+    for f in local.permissions : f.name => f
+  }
+  name             = each.value.name
+  description      = each.value.description
+  instance_arn     = local.instance_sso
+  session_duration = each.value.session_duration
+}
+
+data "aws_ssoadmin_instances" "instance_arns" {}
+
+data "aws_ssoadmin_permission_sets" "arns" {
+  instance_arn = local.instance_sso
+}
+output "arn" {
+  value = local.permission_set_arns
+}
+
+resource "aws_ssoadmin_permission_set_inline_policy" "attach-inline-policy" {
+  for_each = {
+    for p in local.permissions : p.policies.inline_policies => p...
+  }
+
+  inline_policy      = each.value[0].policies.inline_policies
+  instance_arn       = local.instance_sso
+  permission_set_arn = local.permission_set_arns
+}
