@@ -28,30 +28,30 @@ resource "aws_ssoadmin_permission_set_inline_policy" "attach-inline-policy" {
 }
 
 
-data "aws_ssoadmin_instances" "single-sign-on" {}
+# data "aws_ssoadmin_instances" "single-sign-on" {}
 
-resource "aws_ssoadmin_permission_set" "permission_set_cloud" {
-  name         = "Permission-Set-Cloud"
-  instance_arn = tolist(data.aws_ssoadmin_instances.single-sign-on.arns)[0]
-}
+# resource "aws_ssoadmin_permission_set" "permission_set_cloud" {
+#   name         = "Permission-Set-Cloud"
+#   instance_arn = tolist(data.aws_ssoadmin_instances.single-sign-on.arns)[0]
+# }
 
-data "aws_iam_policy_document" "s3-permissions" {
-  statement {
-    sid = "1"
+# data "aws_iam_policy_document" "s3-permissions" {
+#   statement {
+#     sid = "1"
 
-    actions = [
-      "s3:ListAllMyBuckets",
-      "s3:GetBucketLocation",
-    ]
+#     actions = [
+#       "s3:ListAllMyBuckets",
+#       "s3:GetBucketLocation",
+#     ]
 
-    resources = [
-      "arn:aws:s3:::*",
-    ]
-  }
-}
+#     resources = [
+#       "arn:aws:s3:::*",
+#     ]
+#   }
+# }
 
-resource "aws_ssoadmin_permission_set_inline_policy" "inline_policy" {
-  inline_policy      = data.aws_iam_policy_document.s3-permissions.json
-  instance_arn       = tolist(data.aws_ssoadmin_instances.single-sign-on.arns)[0]
-  permission_set_arn = aws_ssoadmin_permission_set.permission_set_cloud.arn
-}
+# resource "aws_ssoadmin_permission_set_inline_policy" "inline_policy" {
+#   inline_policy      = data.aws_iam_policy_document.s3-permissions.json
+#   instance_arn       = tolist(data.aws_ssoadmin_instances.single-sign-on.arns)[0]
+#   permission_set_arn = aws_ssoadmin_permission_set.permission_set_cloud.arn
+# }
