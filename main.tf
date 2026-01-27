@@ -18,12 +18,24 @@ resource "aws_ssoadmin_permission_set" "permission_set" {
 #   value = local.instance_sso
 # }
 
-resource "aws_ssoadmin_permission_set_inline_policy" "attach-inline-policy" {
+# resource "aws_ssoadmin_permission_set_inline_policy" "attach-inline-policy" {
+#   for_each = {
+#     for p in local.permissions : p.policies.inline_policies => p...
+#   }
+
+#   inline_policy      = each.value[0].policies.inline_policies
+#   instance_arn       = local.instance_sso
+#   permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value[0].name].arn
+# }
+
+resource "aws_ssoadmin_permissions_boundary_attachment" "attach-managed-policies" {
   for_each = {
-    for p in local.permissions : p.policies.inline_policies => p...
+    for x in local.permissions : x.description => x...
   }
 
-  inline_policy      = each.value[0].policies.inline_policies
   instance_arn       = local.instance_sso
   permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value[0].name].arn
+  permissions_boundary {
+    managed_policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+  }
 }
