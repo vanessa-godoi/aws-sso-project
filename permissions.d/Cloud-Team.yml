@@ -2,7 +2,14 @@ name : "Cloud-Team"
 description: "Permission set for Cloud Team" 
 session_duration: "PT1H"
 policies:
+  customer_managed_policies:
+    - ec2-list-policy
+    - s3crr_for_aws-associate-saa-c03_a46288
+    - s3replicate_for_aws-associate-saa-c03_d40141
+
   managed_policies:
+    - arn:aws:iam::aws:policy/ReadOnlyAccess
+    - arn:aws:iam::aws:policy/AdministratorAccess-Amplify
 
   inline_policies: | 
     {
@@ -10,7 +17,10 @@ policies:
       "Statement": [
           {
               "Effect": "Allow",
-              "Action": "*",
+              "Action": [
+                  "ec2:Describe*",
+                  "s3:*"
+              ],
               "Resource": "*"
           }
       ]

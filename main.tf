@@ -1,9 +1,3 @@
-data "aws_ssoadmin_instances" "sso" {}
-
-# output "sso_infos" {
-#   value = data.aws_ssoadmin_instances.sso.arns[0]
-# }
-
 resource "aws_ssoadmin_permission_set" "permission_set" {
   for_each = {
     for f in local.permissions : f.name => f
@@ -13,29 +7,35 @@ resource "aws_ssoadmin_permission_set" "permission_set" {
   instance_arn     = local.instance_sso
   session_duration = each.value.session_duration
 }
-
-# output "instance_arns" {
-#   value = local.instance_sso
-# }
-
-# resource "aws_ssoadmin_permission_set_inline_policy" "attach-inline-policy" {
-#   for_each = {
-#     for p in local.permissions : p.policies.inline_policies => p...
-#   }
-
-#   inline_policy      = each.value[0].policies.inline_policies
-#   instance_arn       = local.instance_sso
-#   permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value[0].name].arn
-# }
-
-resource "aws_ssoadmin_permissions_boundary_attachment" "attach-managed-policies" {
+resource "aws_ssoadmin_permission_set_inline_policy" "attach-inline-policy" {
   for_each = {
-    for x in local.permissions : x.description => x...
+    for p in local.permissions : p.name => p
+    if p.policies.inline_policies != null
+  }
+
+  inline_policy      = each.value.policies.inline_policies
+  instance_arn       = local.instance_sso
+  permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.key].arn
+}
+resource "aws_ssoadmin_managed_policy_attachment" "attach-aws-policies" {
+
+  for_each = {
+    for p in local.managed_policies_attachment : "${p.permission_set_name}-${basename(p.managed_policy_arn)}" => p
   }
 
   instance_arn       = local.instance_sso
-  permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value[0].name].arn
-  permissions_boundary {
-    managed_policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+  managed_policy_arn = each.value.managed_policy_arn
+  permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value.permission_set_name].arn
+}
+
+resource "aws_ssoadmin_customer_managed_policy_attachment" "attach-customer-policies" {
+  for_each = {
+    for p in local.customer_policies_attachment : "${p.permission_set_name}-${p.managed_policy_name}" => p
+  }
+  instance_arn       = local.instance_sso
+  permission_set_arn = aws_ssoadmin_permission_set.permission_set[each.value.permission_set_name].arn
+  customer_managed_policy_reference {
+    name = each.value.managed_policy_name
   }
 }
+
