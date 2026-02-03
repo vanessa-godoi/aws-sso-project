@@ -23,5 +23,11 @@ locals {
     ]
     if p.policies.customer_managed_policies != null
   ])
+  group_files = fileset("${path.module}/groups.d", "*.yml")
+
+  groups = [
+    for f in local.group_files :
+    yamldecode(file("${path.module}/groups.d/${f}"))
+  ]
 }
 

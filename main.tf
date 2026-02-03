@@ -38,4 +38,11 @@ resource "aws_ssoadmin_customer_managed_policy_attachment" "attach-customer-poli
     name = each.value.managed_policy_name
   }
 }
+resource "aws_iam_group" "create-groups" {
+  for_each = {
+    for g in local.groups : g.name => g
+  }
+  name = each.value.name
+  path = each.value.path
+}
 
